@@ -5,7 +5,35 @@ from datetime import date
 st.set_page_config(page_title="原民族群口腔健康檢查紀錄表", layout="wide")
 
 st.title("🦷 原民族群口腔健康檢查紀錄表")
-
+# 插入自訂 CSS 來放大字體
+st.markdown(
+    """
+    <style>
+    /* 1. 放大所有輸入框上方的標題 (Label) */
+    label[data-testid="stWidgetLabel"] div {
+        font-size: 20px !important;
+        font-weight: bold !important;
+    }
+    
+    /* 2. 放大選項文字 (Radio, Checkbox) 與一般文字 */
+    div[data-testid="stMarkdownContainer"] p {
+        font-size: 18px !important;
+    }
+    
+    /* 3. 放大輸入框內的文字 */
+    input, textarea, div[data-baseweb="select"] > div {
+        font-size: 18px !important;
+    }
+    
+    /* 4. 放大 Tab 標籤頁的文字 */
+    button[data-baseweb="tab"] div {
+        font-size: 20px !important;
+        font-weight: bold !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 # 建立分頁以利長表單填寫
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "一、基本資料與病史", 
