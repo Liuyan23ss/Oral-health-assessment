@@ -1,45 +1,58 @@
 import streamlit as st
 import pandas as pd
-import os
-import json
+import gspread
+from google.oauth2.service_account import Credentials
 from datetime import date, datetime
 
 st.set_page_config(page_title="原民族群口腔健康檢查紀錄表", layout="wide")
 
 # ==========================================
-# 工具函式
+# Google Sheets 連線
 # ==========================================
+@st.cache_resource
+def get_worksheet():
+    scopes = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive",
+    ]
+
+    credentials = Credentials.from_service_account_info(
+        dict(st.secrets["gcp_service_account"]),
+        scopes=scopes,
+    )
+    client = gspread.authorize(credentials)
+
+    spreadsheet = client.open(st.secrets["sheets"]["spreadsheet_name"])
+    worksheet = spreadsheet.worksheet(st.secrets["sheets"]["worksheet_name"])
+    return worksheet
+
+
 def safe_join(values):
     if not values:
         return ""
     return "、".join(map(str, values))
 
-def sanitize_filename(text):
-    """避免檔名出現不合法字元"""
-    invalid_chars = ['\\', '/', ':', '*', '?', '"', '<', '>', '|']
-    for ch in invalid_chars:
-        text = text.replace(ch, "_")
-    return text.strip()
 
-def save_form_to_json(data_dict, folder="data"):
-    """將單份表單存成一個 JSON 檔"""
-    os.makedirs(folder, exist_ok=True)
+def append_dict_to_sheet(data_dict):
+    worksheet = get_worksheet()
 
-    patient_id = sanitize_filename(str(data_dict.get("patient_id", "unknown")))
-    name = sanitize_filename(str(data_dict.get("name", "unknown")))
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    headers = worksheet.row_values(1)
 
-    filename = f"{timestamp}_{patient_id}_{name}.json"
-    filepath = os.path.join(folder, filename)
+    # 如果工作表是空的，先寫入標題列
+    if not headers:
+        headers = list(data_dict.keys())
+        worksheet.append_row(headers, value_input_option="USER_ENTERED")
 
-    with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(data_dict, f, ensure_ascii=False, indent=4)
+    # 若有新欄位，自動補到表頭
+    missing_headers = [key for key in data_dict.keys() if key not in headers]
+    if missing_headers:
+        headers.extend(missing_headers)
+        worksheet.update("1:1", [headers])
 
-    return filepath
+    row = [data_dict.get(header, "") for header in headers]
+    worksheet.append_row(row, value_input_option="USER_ENTERED")
 
-# ==========================================
-# UI
-# ==========================================
+
 st.title("🦷 原民族群口腔健康檢查紀錄表")
 
 st.markdown(
@@ -274,6 +287,9 @@ with st.form(key="full_exam_form"):
         chewing_abnormal = st.checkbox("咀嚼功能：不能咀嚼 > 4項")
         basic_info_checked = st.checkbox("基本資料已詢問")
 
+    # ==========================================
+    # 送出按鈕
+    # ==========================================
     st.divider()
     submit_button = st.form_submit_button(label="💾 儲存並送出此份紀錄表")
 
@@ -341,7 +357,7 @@ with st.form(key="full_exam_form"):
                     "swallow_3": swallow_3,
                     "swallow_avg": swallow_avg,
                     "rsst": rsst,
-                    "tongue_coating_scores": tongue_coating_scores,
+                    "tongue_coating_scores": ",".join(map(str, tongue_coating_scores)),
                     "teeth_less_than_20": teeth_less_than_20,
                     "xylitol_done": xylitol_done,
                     "chewing_abnormal": chewing_abnormal,
@@ -352,10 +368,9 @@ with st.form(key="full_exam_form"):
                 form_data.update(chew_answers)
                 form_data.update(ofi_answers)
 
-                saved_path = save_form_to_json(form_data)
+                append_dict_to_sheet(form_data)
 
                 st.success(f"✅ 已成功儲存病患 {name} ({patient_id}) 的完整紀錄表！")
-                st.info(f"檔案位置：{saved_path}")
 
             except Exception as e:
                 st.error(f"❌ 儲存失敗：{e}")
