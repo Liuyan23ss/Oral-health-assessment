@@ -205,9 +205,61 @@ with st.form(key="full_exam_form"):
         ]
 
         eat10_scores = {}
+        score_options = [0, 1, 2, 3, 4]
+        
         for idx, q in enumerate(eat10_questions, start=1):
-            eat10_scores[f"EAT10_{idx}"] = st.slider(q, 0, 4, 0)
+            eat10_scores[f"EAT10_{idx}"] = st.radio(
+                q,
+                score_options,
+                horizontal=True,
+                key=f"eat10_{idx}"
+            )
+        st.markdown("""
+        <style>
+        /* 只讓 EAT-10 看起來更精緻 */
+        .eat10-block {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 16px;
+            padding: 14px 18px 10px 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
 
+        /* 題目與選項間距 */
+        .eat10-block label[data-testid="stWidgetLabel"] {
+            margin-bottom: 8px !important;
+        }
+
+        /* 選項列 */
+        .eat10-block div[role="radiogroup"] {
+            display: flex !important;
+            gap: 10px !important;
+            justify-content: flex-start !important;
+            margin-top: 6px;
+            margin-bottom: 2px;
+        }
+
+        /* 每個分數按鈕 */
+        .eat10-block div[role="radiogroup"] label {
+            background: #f8f9fa;
+            border: 1px solid #dcdfe3;
+            border-radius: 999px;
+            padding: 6px 14px;
+            min-width: 44px;
+            text-align: center;
+            font-size: 18px !important;
+            font-weight: 600 !important;
+            cursor: pointer;
+        }
+
+        /* hover */
+        .eat10-block div[role="radiogroup"] label:hover {
+            background: #eef7ff;
+            border-color: #7bb6f0;
+        }
+        </style>
+        """, unsafe_allow_html=True)
         st.divider()
         st.header("咀嚼能力評估 (6個月內自評)")
         diet_type = st.radio("您的飲食習慣為？", ["葷食", "素食"], horizontal=True)
