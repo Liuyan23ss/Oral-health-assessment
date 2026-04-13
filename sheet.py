@@ -55,30 +55,80 @@ def append_dict_to_sheet(data_dict):
 
 st.title("🦷 原民族群口腔健康檢查紀錄表")
 
-st.markdown(
-    """
+st.markdown("""
     <style>
+
+    /* 🔥 全站放大基準 */
+    html {
+        font-size: 20px;
+    }
+
+    /* 🔥 標題 */
+    h1 {
+        font-size: 2.8rem !important;
+    }
+    h2 {
+        font-size: 2.2rem !important;
+    }
+    h3 {
+        font-size: 1.8rem !important;
+    }
+
+    /* 🔥 表單標籤（題目） */
     label[data-testid="stWidgetLabel"] div {
-        font-size: 20px !important;
+        font-size: 22px !important;
         font-weight: bold !important;
     }
 
+    /* 🔥 一般說明文字 */
     div[data-testid="stMarkdownContainer"] p {
-        font-size: 18px !important;
-    }
-
-    input, textarea, div[data-baseweb="select"] > div {
-        font-size: 18px !important;
-    }
-
-    button[data-baseweb="tab"] div {
         font-size: 20px !important;
+    }
+
+    /* 🔥 輸入框（文字） */
+    input, textarea {
+        font-size: 20px !important;
+        padding: 10px !important;
+    }
+
+    /* 🔥 selectbox / dropdown */
+    div[data-baseweb="select"] > div {
+        font-size: 20px !important;
+    }
+
+    /* 🔥 radio / checkbox */
+    div[role="radiogroup"] label,
+    div[data-testid="stCheckbox"] label {
+        font-size: 20px !important;
+    }
+
+    /* 🔥 slider */
+    [data-testid="stSlider"] {
+        font-size: 18px !important;
+    }
+
+    /* 🔥 tabs（上面那排） */
+    button[data-baseweb="tab"] div {
+        font-size: 22px !important;
         font-weight: bold !important;
     }
+
+    /* 🔥 按鈕 */
+    button[kind="primary"] {
+        font-size: 22px !important;
+        padding: 12px 20px !important;
+    }
+
+    /* 🔥 dataframe（如果之後有用） */
+    thead tr th {
+        font-size: 18px !important;
+    }
+    tbody tr td {
+        font-size: 18px !important;
+    }
+
     </style>
-    """,
-    unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "一、基本資料與病史",
